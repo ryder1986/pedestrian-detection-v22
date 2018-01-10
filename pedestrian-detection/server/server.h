@@ -106,6 +106,7 @@ public:
         connect(skt,SIGNAL(error(QAbstractSocket::SocketError)),this,SLOT(socket_error()));
         //   udp_skt=new QUdpSocket();
         client_addr=skt->peerAddress();
+        prt(info,"socket state %d",skt->state());
         timer=new QTimer(this);
         connect(timer,SIGNAL(timeout()),this,SLOT(check_output()));
         timer->start(10);
@@ -163,8 +164,10 @@ public slots:
     }
 
     void handle_msg(){
+
         int writes_num=0;
         QByteArray client_buf=skt->readAll();
+        prt(info,"server get %d bytes",client_buf.size());
         rcv_buf=client_buf.data();
 
         int ret_size=process(rcv_buf,send_buf,client_buf.size());
@@ -319,7 +322,7 @@ public slots:
     void handle_session_op(int req,void *addr,int &reply)
     {
         int idx=clients.indexOf((ClientSession *)addr);
-            prt(info,"client %d",idx);
+            prt(info,"client %d msg",idx);
         switch(req){
         case SESSION_REQUEST::TRY_TO_WRITE:
             prt(info,"client wirte request");

@@ -185,6 +185,7 @@ public slots:
           //  char buf[2000];
          prt(info,"connect %s",ip.toStdString().data());
          if(ip.length()){
+
              clt->connect_to_server(ip);
 
              //if connect ok ,then continue;
@@ -201,6 +202,8 @@ public slots:
                  QTreeWidgetItem *itm1=new QTreeWidgetItem(QStringList(p_cfg->cfg.camera[i].ip));
                  p_item_device_root->addChild(itm1);
              }
+
+
          }else{
              prt(info,"no server found");
          }

@@ -12,7 +12,7 @@ MainWindow::MainWindow(QWidget *parent)
     p_video_thread=NULL;
     search_widget=new SearchWidget;
     connect(search_widget,SIGNAL(select_ip(QString)),this,SLOT(connect_server(QString)),Qt::QueuedConnection);
-    connect(searcher,SIGNAL(find_ip(QString)),search_widget,SLOT(add_text(QString)));
+    connect(searcher,SIGNAL(find_ip(QString)),search_widget,SLOT(add_text(QString)),Qt::QueuedConnection);
 }
 
 MainWindow::~MainWindow()

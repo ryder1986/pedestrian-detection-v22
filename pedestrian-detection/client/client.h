@@ -27,13 +27,13 @@ public slots:
         QString str;
         str.clear();
         int sleep_time=10;
-//        while(!udp_skt_find_server->hasPendingDatagrams())
-//        {
-//            QThread::msleep(sleep_time);
-//            if(tick++>timeout_seconds*1000/sleep_time){
-//                return str;
-//            }
-//        }
+        //        while(!udp_skt_find_server->hasPendingDatagrams())
+        //        {
+        //            QThread::msleep(sleep_time);
+        //            if(tick++>timeout_seconds*1000/sleep_time){
+        //                return str;
+        //            }
+        //        }
         int try_times=100;
         while(try_times--){
             if(udp_skt_find_server->hasPendingDatagrams()){
@@ -46,18 +46,18 @@ public slots:
                 ip_list.append(server_ip);
                 emit resultReady(server_ip);
             }else{
-            //      prt(info,"searching");
+                //      prt(info,"searching");
             }
             QThread::msleep(10);
         }
 
-      //  emit resultReady(result);
+        //  emit resultReady(result);
     }
 
 signals:
     void resultReady(  QString result);
 private:
-  //  QUdpSocket *udp_skt_find_server;
+    //  QUdpSocket *udp_skt_find_server;
 
     QByteArray datagram;
     QString server_ip;
@@ -66,9 +66,9 @@ private:
 
 class ServerInfoSearcher : public QObject{
     Q_OBJECT
- //   std::thread *p_find_server_thread;
+    //   std::thread *p_find_server_thread;
     QThread FinderThread;
-   ServerFinder *finder;
+    ServerFinder *finder;
 
 public:
     ServerInfoSearcher()
@@ -78,13 +78,13 @@ public:
         udp_skt_find_server->bind(Protocol::CLIENT_REPORTER_PORT,QUdpSocket::ShareAddress);
         //     connect(udp_skt_find_server,SIGNAL(readyRead()),this,SLOT(get_reply()),Qt::QueuedConnection);
 
-     //   connect();
+        //   connect();
 
         finder=new ServerFinder;
         connect(&FinderThread,&QThread::finished,finder,&QObject::deleteLater);
         connect(this,SIGNAL(begin_search(QUdpSocket*)),finder,SLOT(find(QUdpSocket*)),Qt::QueuedConnection);
         connect(finder,SIGNAL(resultReady(QString)),this,SLOT(ip_found(QString)),Qt::QueuedConnection);
-           }
+    }
     ~ServerInfoSearcher()
     {
         FinderThread.quit();
@@ -111,7 +111,7 @@ public:
         ip_list.clear();
         broadcast_info();
         search();
-     //   p_find_server_thread=new std::thread(find_server);
+        //   p_find_server_thread=new std::thread(find_server);
         //   QThread::msleep(3000);
 
     }
@@ -121,11 +121,11 @@ public:
     }
     static void find_server()
     {
-         prt(info," find server thread");
-         int times=10;
-         while(times--){
+        prt(info," find server thread");
+        int times=10;
+        while(times--){
 
-         }
+        }
     }
 
     QString wait_server_info_reply(int timeout_seconds)
@@ -134,13 +134,13 @@ public:
         QString str;
         str.clear();
         int sleep_time=10;
-//        while(!udp_skt_find_server->hasPendingDatagrams())
-//        {
-//            QThread::msleep(sleep_time);
-//            if(tick++>timeout_seconds*1000/sleep_time){
-//                return str;
-//            }
-//        }
+        //        while(!udp_skt_find_server->hasPendingDatagrams())
+        //        {
+        //            QThread::msleep(sleep_time);
+        //            if(tick++>timeout_seconds*1000/sleep_time){
+        //                return str;
+        //            }
+        //        }
         int try_times=100;
         while(try_times--){
             if(udp_skt_find_server->hasPendingDatagrams()){
@@ -250,7 +250,8 @@ public:
         in.setVersion(QDataStream::Qt_1_0);
         connect(tcp_socket,SIGNAL(error(QAbstractSocket::SocketError)),this,SLOT(displayError(QAbstractSocket::SocketError)));
         connect(tcp_socket,SIGNAL(readyRead()),this,SLOT(handle_server_msg()),Qt::DirectConnection);
-    }
+        connect(tcp_socket,SIGNAL(connected()),this,SLOT(handle_connected()),Qt::DirectConnection);
+         }
     void pack_tcp_data(char *c,int length){
 
         quint16  *pos_version=( quint16  *)c+2;
@@ -274,6 +275,7 @@ public:
     {
         static  char buf[100];
         int ret=  in.readRawData((char *)buf,3);
+        prt(info,"read msg now ");
         qDebug()<<QString::fromRawData((QChar *)buf,3);
     }
     QByteArray get_config()
@@ -289,26 +291,26 @@ public:
         QByteArray ret;
         ret.resize(0);
         int write_bytes=0;
-
+        prt(info,"state %d ",tcp_socket->state());
         write_bytes=tcp_socket->write(buf,len);
-        int times=100;
+        int times=10;
         while (times--) {
-             QThread::msleep(100);
-             lock.lock();
-             if(need_read){
-                 ret=ret_ba;
-                 need_read=false;
-                 prt(info,"get server reply");
-                     lock.unlock();
-                 break;
-             }
-             prt(info,"get nothing ");
-             lock.unlock();
+            QThread::msleep(100);
+            lock.lock();
+            if(need_read){
+                ret=ret_ba;
+                need_read=false;
+                prt(info,"get server reply");
+                lock.unlock();
+                break;
+            }
+            prt(info,"get nothing ");
+            lock.unlock();
         }
 
 
-   //     if(tcp_socket->waitForReadyRead())
-    //        ret=tcp_socket->readAll();
+        //     if(tcp_socket->waitForReadyRead())
+        //        ret=tcp_socket->readAll();
         return ret;
     }
 
@@ -316,27 +318,42 @@ public:
 signals:
     // void send_camera_rst(int index, QByteArray ba);
 public slots:
+    void handle_connected()
+    {
+              prt(info,"connetde now");
+    }
+
     void handle_server_msg()
     {
         prt(info,"get msg from server");
         lock.lock();
         ret_ba=tcp_socket->readAll();
         if(ret_ba.size()>0)
-             need_read=true;
+            need_read=true;
         lock.unlock();
     }
 
     void connect_to_server(QString ip)
     {
-        if(server_ip.size()){
-            tcp_socket->disconnectFromHost();
-            server_ip=ip;
-            tcp_socket->connectToHost(server_ip,Protocol::SERVER_PORT);
+        prt(info,"conneting %s",server_ip.toStdString().data());
+        if(ip.size()){
+            prt(info,"state %d ",tcp_socket->state());
+            if(tcp_socket->state()==QAbstractSocket::ConnectedState)
+                tcp_socket->disconnectFromHost();
+            prt(info,"new ip %s connect (%d)",server_ip.toStdString().data(),tcp_socket->state());
             if(ip==server_ip){
                 prt(info,"same ip reconnect");
+                tcp_socket->connectToHost(server_ip,Protocol::SERVER_PORT);
             }else{
-                prt(info,"new ip connect");
+                server_ip=ip;
+                tcp_socket->connectToHost(server_ip,Protocol::SERVER_PORT);
+//                while(1){
+//                    prt(info,"new ip %s connect (%d)",server_ip.toStdString().data(),tcp_socket->state());
+//                    QThread::sleep(1);
+//                }
             }
+            prt(info,"new ip %s connect (%d)",server_ip.toStdString().data(),tcp_socket->state());
+            prt(info,"state %d ",tcp_socket->state());
         }else{
             server_ip=ip;
             tcp_socket->connectToHost(server_ip,Protocol::SERVER_PORT);
