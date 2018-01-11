@@ -192,6 +192,9 @@ public slots:
 //             int request_length=Protocol::encode_configuration_request(buf);//encoder buffer
 //             QByteArray rst=clt->call_server(buf,request_length);//talk to server
 //             rst=rst.remove(0,Protocol::HEAD_LENGTH);//TODO:get the ret value
+
+clt->get_config();
+#if 0
              p_cfg->set_config( clt->get_config());
 
              //handle tree list
@@ -202,13 +205,26 @@ public slots:
                  QTreeWidgetItem *itm1=new QTreeWidgetItem(QStringList(p_cfg->cfg.camera[i].ip));
                  p_item_device_root->addChild(itm1);
              }
-
-
+#endif
          }else{
              prt(info,"no server found");
          }
     }
 
+    void handle_msg(QByteArray rst)
+    {
+         prt(info,"@@@@@@@@@@@@@@@@@@");
+         p_cfg->set_config( rst);
+
+         //handle tree list
+         window->treeWidget_devices->clear();
+         p_item_device_root=new QTreeWidgetItem(QStringList(clt->server_ip));
+         window->treeWidget_devices->addTopLevelItem(p_item_device_root);
+         for(int i=0;i<p_cfg->cfg.camera_amount;i++){
+             QTreeWidgetItem *itm1=new QTreeWidgetItem(QStringList(p_cfg->cfg.camera[i].ip));
+             p_item_device_root->addChild(itm1);
+         }
+    }
 
 private:
     Ui::Form *window;
@@ -221,6 +237,7 @@ private:
     int selected_camera_index;
     VideoThread *p_video_thread;
     SearchWidget *search_widget;
+
 };
 
 #endif // MAINWINDOW_H

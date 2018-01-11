@@ -251,7 +251,7 @@ public:
         connect(tcp_socket,SIGNAL(error(QAbstractSocket::SocketError)),this,SLOT(displayError(QAbstractSocket::SocketError)));
         connect(tcp_socket,SIGNAL(readyRead()),this,SLOT(handle_server_msg()),Qt::DirectConnection);
         connect(tcp_socket,SIGNAL(connected()),this,SLOT(handle_connected()),Qt::DirectConnection);
-         }
+    }
     void pack_tcp_data(char *c,int length){
 
         quint16  *pos_version=( quint16  *)c+2;
@@ -294,19 +294,19 @@ public:
         prt(info,"state %d ",tcp_socket->state());
         write_bytes=tcp_socket->write(buf,len);
         int times=10;
-        while (times--) {
-            QThread::msleep(100);
-            lock.lock();
-            if(need_read){
-                ret=ret_ba;
-                need_read=false;
-                prt(info,"get server reply");
-                lock.unlock();
-                break;
-            }
-            prt(info,"get nothing ");
-            lock.unlock();
-        }
+//        while (times--) {
+//            QThread::msleep(100);
+//            lock.lock();
+//            if(need_read){
+//                ret=ret_ba;
+//                need_read=false;
+//                prt(info,"get server reply");
+//                lock.unlock();
+//                break;
+//            }
+//            prt(info,"get nothing ");
+//            lock.unlock();
+//        }
 
 
         //     if(tcp_socket->waitForReadyRead())
@@ -331,6 +331,10 @@ public slots:
         if(ret_ba.size()>0)
             need_read=true;
         lock.unlock();
+        prt(info,"state %d",tcp_socket->state());
+         int op=Protocol::decode_head_op(ret_ba.data());
+          if(ret_ba.size()>0&&op==Protocol::GET_CONFIG)
+              emit server_msg(ret_ba.remove(0,Protocol::HEAD_LENGTH));
     }
 
     void connect_to_server(QString ip)
@@ -376,7 +380,8 @@ public slots:
             qDebug()<<"1";
         }
     }
-
+signals:
+    void server_msg(QByteArray msg);
 private:
     mutex lock;
     QByteArray ret_ba;
