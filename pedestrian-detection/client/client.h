@@ -294,19 +294,19 @@ public:
         prt(info,"state %d ",tcp_socket->state());
         write_bytes=tcp_socket->write(buf,len);
         int times=10;
-//        while (times--) {
-//            QThread::msleep(100);
-//            lock.lock();
-//            if(need_read){
-//                ret=ret_ba;
-//                need_read=false;
-//                prt(info,"get server reply");
-//                lock.unlock();
-//                break;
-//            }
-//            prt(info,"get nothing ");
-//            lock.unlock();
-//        }
+        //        while (times--) {
+        //            QThread::msleep(100);
+        //            lock.lock();
+        //            if(need_read){
+        //                ret=ret_ba;
+        //                need_read=false;
+        //                prt(info,"get server reply");
+        //                lock.unlock();
+        //                break;
+        //            }
+        //            prt(info,"get nothing ");
+        //            lock.unlock();
+        //        }
 
 
         //     if(tcp_socket->waitForReadyRead())
@@ -320,7 +320,7 @@ signals:
 public slots:
     void handle_connected()
     {
-              prt(info,"connetde now");
+        prt(info,"connetde now");
     }
 
     void handle_server_msg()
@@ -332,9 +332,9 @@ public slots:
             need_read=true;
         lock.unlock();
         prt(info,"state %d",tcp_socket->state());
-         int op=Protocol::decode_head_op(ret_ba.data());
-          if(ret_ba.size()>0&&op==Protocol::GET_CONFIG)
-              emit server_msg(ret_ba.remove(0,Protocol::HEAD_LENGTH));
+        int op=Protocol::decode_head_op(ret_ba.data());
+        if(ret_ba.size()>0&&op==Protocol::GET_CONFIG)
+            emit server_msg(ret_ba.remove(0,Protocol::HEAD_LENGTH));
     }
 
     void connect_to_server(QString ip)
@@ -351,10 +351,10 @@ public slots:
             }else{
                 server_ip=ip;
                 tcp_socket->connectToHost(server_ip,Protocol::SERVER_PORT);
-//                while(1){
-//                    prt(info,"new ip %s connect (%d)",server_ip.toStdString().data(),tcp_socket->state());
-//                    QThread::sleep(1);
-//                }
+                //                while(1){
+                //                    prt(info,"new ip %s connect (%d)",server_ip.toStdString().data(),tcp_socket->state());
+                //                    QThread::sleep(1);
+                //                }
             }
             prt(info,"new ip %s connect (%d)",server_ip.toStdString().data(),tcp_socket->state());
             prt(info,"state %d ",tcp_socket->state());
